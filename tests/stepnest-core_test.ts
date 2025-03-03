@@ -40,3 +40,25 @@ Clarinet.test({
     assertEquals(block.receipts[1].result, '(ok true)');
   },
 });
+
+Clarinet.test({
+  name: "Ensure routes can be rated after completion",
+  async fn(chain: Chain, accounts: Map<string, Account>) {
+    const deployer = accounts.get("deployer")!;
+    
+    let block = chain.mineBlock([
+      Tx.contractCall("stepnest-core", "create-route",
+        [types.utf8("Test Route"), types.utf8("Description"), types.uint(3), types.uint(5000)],
+        deployer.address),
+      Tx.contractCall("stepnest-core", "complete-route",
+        [types.uint(1)],
+        deployer.address),
+      Tx.contractCall("stepnest-core", "rate-route",
+        [types.uint(1), types.uint(5)],
+        deployer.address)
+    ]);
+    
+    assertEquals(block.receipts.length, 3);
+    assertEquals(block.receipts[2].result, '(ok true)');
+  },
+});
